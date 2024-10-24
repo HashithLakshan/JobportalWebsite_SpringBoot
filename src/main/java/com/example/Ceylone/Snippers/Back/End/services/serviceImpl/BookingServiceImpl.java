@@ -5,6 +5,7 @@ import com.example.Ceylone.Snippers.Back.End.constant.CommonStatus;
 import com.example.Ceylone.Snippers.Back.End.dto.BookingsDto;
 import com.example.Ceylone.Snippers.Back.End.dto.UserDto;
 import com.example.Ceylone.Snippers.Back.End.entity.Bookings;
+import com.example.Ceylone.Snippers.Back.End.entity.User;
 import com.example.Ceylone.Snippers.Back.End.repository.BookingRepository;
 import com.example.Ceylone.Snippers.Back.End.services.BookingService;
 import com.example.Ceylone.Snippers.Back.End.services.PhotographerService;
@@ -226,15 +227,30 @@ public  class BookingServiceImpl implements BookingService {
         CommonResponse commonResponse = new CommonResponse();
 
         try {
-//            List<String> validationList = this.BookingsValidation(bookingsDto);
-//            if (!validationList.isEmpty()) {
-//                commonResponse.setErrorMessages(validationList);
-//                return commonResponse;
-//            }
-           Bookings bookings = castBookingsDTOIntoBookings(bookingsDto);
-            bookingRepository.save(bookings);
-            commonResponse.setStatus(true);
-            commonResponse.setPayload(Collections.singletonList(bookings));
+            List<String> validationList = this.BookingsValidation(bookingsDto);
+            if (!validationList.isEmpty()) {
+                commonResponse.setErrorMessages(validationList);
+                return commonResponse;
+            }
+
+            Bookings bookingsDb = bookingRepository.findByDatesAndPhotographerPhotographerID(bookingsDto.getDates(), Long.valueOf(bookingsDto.getPhotographerDto().getPhotographerID()));
+
+if(bookingsDb != null) {
+
+    commonResponse.setStatus(false);
+    validationList.add("This Date is early Someone booking");
+    commonResponse.setErrorMessages(validationList);
+}else {
+
+
+    Bookings bookings = castBookingsDTOIntoBookings(bookingsDto);
+    bookingRepository.save(bookings);
+    commonResponse.setStatus(true);
+    commonResponse.setCommonMessage("Your Booking Successfully");
+    commonResponse.setPayload(Collections.singletonList(bookings));
+
+}
+
 
 
         } catch (Exception e) {
@@ -271,8 +287,7 @@ public  class BookingServiceImpl implements BookingService {
             validationList.add(CommonMessage.EMPTY_DATE);
         if (CommonValidation.stringNullValidation(bookingsDto.getShootTimeDuration()))
             validationList.add(CommonMessage.SELECT_YOUR_SHOOT_TIME_DURATION);
-        if (CommonValidation.isValidLengthDiscriptions(bookingsDto.getTellUsMoreDiscription()))
-            validationList.add(CommonMessage.THREEHUNDRUND_CHARACHTERS_ONLY);
+
         return validationList;
     }
 
@@ -301,7 +316,6 @@ public  class BookingServiceImpl implements BookingService {
                 return commonResponse;
             }
 
-            System.out.println("bookingsDto.getPhotographerDto().getPhotographerID():: "+bookingsDto.getPhotographerDto().getPhotographerID());
             Bookings exsitsbookings = bookingRepository.findById(Long.valueOf(bookingsDto.getBookingID())).get();
             if (exsitsbookings != null) {
                 exsitsbookings.setLocation(bookingsDto.getLocation());
@@ -310,18 +324,14 @@ public  class BookingServiceImpl implements BookingService {
                 exsitsbookings.setDates(bookingsDto.getDates());
                 exsitsbookings.setTellUsMoreDiscription(bookingsDto.getTellUsMoreDiscription());
                 exsitsbookings.setCommonStatus(bookingsDto.getCommonStatus());
-                exsitsbookings.setUser(userService.findByUserID(bookingsDto.getUserDto().getUserID()));
-                exsitsbookings.setPhotographer(photographerService.findByPhotgrapherID(bookingsDto.getPhotographerDto().getPhotographerID()));
-
                 bookingRepository.save(exsitsbookings);
                 commonResponse.setStatus(true);
-                commonResponse.setPayload(Collections.singletonList(exsitsbookings));
+                commonResponse.setCommonMessage("Updated Successfully");
             } else {
                 commonResponse.setErrorMessages(Collections.singletonList("User not found"));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             LOGGER.error("/**************** Exception in BookingService -> update(booking)" + e);
             commonResponse.setErrorMessages(Collections.singletonList("An error occurred while updating bookings"));
         }
@@ -366,10 +376,10 @@ public CommonResponse updateStatusConfirmBookings(String bookingID) {
             bookings.setCommonStatus(CommonStatus.INACTIVE);
             bookingRepository.save(bookings);
             commonResponse.setStatus(true);
+            commonResponse.setCommonMessage("Delete Recycle Bin");
             commonResponse.setPayload(Collections.singletonList(bookings));
         } else {
-            commonResponse.setErrorMessages(Collections.singletonList("User not found"));
-        }
+commonResponse.setCommonMessage("Booking not found");        }
 
     } catch (Exception e) {
         LOGGER.error("/**************** Exception in BookingService -> update()" + e);

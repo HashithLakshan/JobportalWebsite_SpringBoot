@@ -71,11 +71,13 @@ public class UserToPhotographerFeedbacksServiceImpl implements UserToPhotographe
             List<String> validationList = this.FeedbacksValidation(userToPhotographerFeedbacksDto);
             if (!validationList.isEmpty()) {
                 commonResponse.setErrorMessages(validationList);
+                commonResponse.setStatus(false);
                 return commonResponse;
             }
             UserToPhotographerFeedbacks userToPhotographerFeedbacks = castUserToPhotographerFeedbacksDTOIntoUserToPhotographerFeedbacks(userToPhotographerFeedbacksDto);
             userToPhotographerFeedbacksRepository.save(userToPhotographerFeedbacks);
             commonResponse.setStatus(true);
+            commonResponse.setCommonMessage("Your Request Successfully Submitted");
             commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacks));
 
 
@@ -199,15 +201,26 @@ CommonResponse commonResponse =new CommonResponse();
 
         UserToPhotographerFeedbacksDto  userToPhotographerFeedbacksDto =new UserToPhotographerFeedbacksDto();
 
+
+
+
+
         Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks   -> userToPhotographerFeedbacks.getCommonStatus() != CommonStatus.DELETE;
 
         // Retrieve bookings for the photographer and filter them
         List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByUserUserNameAndPhotographerPhotographerID(userName, Long.valueOf(photographerID));
-        List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
+
+            List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
+            if(userToPhotographerFeedbacksDtos.isEmpty()){
+                commonResponse.setStatus(false);
+                commonResponse.setCommonMessage("User Not Found");
+
+            } else  {
+                commonResponse.setStatus(true);
+                 commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+            }
 
 
-        commonResponse.setStatus(true);
-        commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
         return commonResponse;
     }
 
@@ -218,24 +231,55 @@ CommonResponse commonResponse =new CommonResponse();
 
 
         UserToPhotographerFeedbacksDto  userToPhotographerFeedbacksDto =new UserToPhotographerFeedbacksDto();
+        try {
 
-        Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks   -> userToPhotographerFeedbacks.getCommonStatus() != CommonStatus.DELETE;
+            Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks -> userToPhotographerFeedbacks.getCommonStatus() != CommonStatus.DELETE;
 
-        // Retrieve bookings for the photographer and filter them
-        List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByUserUserIDAndPhotographerPhotographerID(Long.valueOf(userID), Long.valueOf(photographerID));
-        List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
+            // Retrieve bookings for the photographer and filter them
+            List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByUserUserIDAndPhotographerPhotographerID(Long.valueOf(userID), Long.valueOf(photographerID));
+            List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+        } catch (Exception e) {
+            LOGGER.error("***************** Search Id User to Photographer****************"+e);
 
+        }
 
-        commonResponse.setStatus(true);
-        commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
         return commonResponse;
+    }
+
+    @Override
+    public CommonResponse getFeedBackIDDetailss(String uToPFeedbackID) {
+        CommonResponse commonResponse = new CommonResponse();
+        UserToPhotographerFeedbacksDto  userToPhotographerFeedbacksDto;
+        try {
+
+            Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks -> userToPhotographerFeedbacks.getCommonStatus() != CommonStatus.DELETE;
+
+            // Retrieve bookings for the photographer and filter them
+            UserToPhotographerFeedbacks userToPhotographerFeedbacks = userToPhotographerFeedbacksRepository.findById(Long.valueOf(uToPFeedbackID)).get();
+            userToPhotographerFeedbacksDto = castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto(userToPhotographerFeedbacks);
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDto));
+        } catch (Exception e) {
+            LOGGER.error("***************** Search Id User to Photographer****************"+e);
+
+        }
+
+        return commonResponse;
+
+
     }
 
     private List<String> FeedbacksValidation(UserToPhotographerFeedbacksDto userToPhotographerFeedbacksDto) {
 
         List<String> validationList = new ArrayList<>();
+        if (CommonValidation.stringNullValidation(userToPhotographerFeedbacksDto.getUserDto().getUserID()))
+            validationList.add("Please Login Your Account");
         if (CommonValidation.stringNullValidation(userToPhotographerFeedbacksDto.getUToPSubject()))
-            validationList.add(CommonMessage.SELECT_YOUR_SHOOT_TYPE);
+            validationList.add("Fill the Subject field");
+        if(CommonValidation.stringNullValidation(userToPhotographerFeedbacksDto.getUToPDiscription()))
+            validationList.add("Fill the Discription field");
         return validationList;
     }
 

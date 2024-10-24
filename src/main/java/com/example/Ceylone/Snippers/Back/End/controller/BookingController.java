@@ -61,7 +61,7 @@ public class BookingController {
     private CommonResponse getDetailsDeleteOfBookingUsingPhotographerId(@PathVariable String PhotographerId){
         return bookingService.getDetailsDeleteOfBookingUsingPhotographerId(PhotographerId);
     }
-    @GetMapping("/getBookingByUser/{userID}/{photographerID}")
+    @GetMapping("/getBookingByUserId/{userID}/{photographerID}")
     public  CommonResponse getBookingUserBookingDetailss(@PathVariable String userID,@PathVariable String photographerID){
         return bookingService.getBookingUserBookingDetailss( userID,photographerID);
     }

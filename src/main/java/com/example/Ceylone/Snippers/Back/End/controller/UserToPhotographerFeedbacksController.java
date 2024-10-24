@@ -49,14 +49,18 @@ public class UserToPhotographerFeedbacksController {
         return userToPhotographerFeedbacksService.updateYes(uToPFeedbackID);
     }
 
-    @GetMapping("/getFeedbackByUser/{userName}/{photographerID}")
+    @GetMapping("/getFeedbackByUserName/{userName}/{photographerID}")
     public  CommonResponse getFeedabacksSearchName(@PathVariable String userName,@PathVariable String photographerID){
         return userToPhotographerFeedbacksService.getFeedabacksSearchName( userName,photographerID);
     }
 
-    @GetMapping("/getFeedbacksByUser/{userID}/{photographerID}")
+    @GetMapping("/getFeedbacksByUserID/{userID}/{photographerID}")
     public  CommonResponse getFeedabacksSearchID(@PathVariable String userID,@PathVariable String photographerID){
         return userToPhotographerFeedbacksService.getFeedabacksSearchID( userID,photographerID);
+    }
+    @GetMapping("/getFeedBackIDDetails/{uToPFeedbackID}")
+    public  CommonResponse getFeedBackIDDetails(@PathVariable String uToPFeedbackID ){
+    return userToPhotographerFeedbacksService.getFeedBackIDDetailss(uToPFeedbackID);
     }
 
 

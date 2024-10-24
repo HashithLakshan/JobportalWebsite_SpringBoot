@@ -26,4 +26,8 @@ public interface BookingRepository extends JpaRepository <Bookings,Long> {
     List<Object> findByBookingID(Long BookingID);
   List<Bookings> findByPhotographer_PhotographerIDAndUserUserIDOrUser_UserID(String photographerID, String userID, String userName);
 
+
+  Bookings findByDates(LocalDate dates);
+
+  Bookings findByDatesAndPhotographerPhotographerID(LocalDate dates, Long photographerID);
 }

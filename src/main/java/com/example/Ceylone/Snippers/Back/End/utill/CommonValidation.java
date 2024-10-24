@@ -18,6 +18,9 @@ public class CommonValidation {
 
 
 
+    public static boolean isLongValue(Object y) {
+        return y instanceof Long;
+    }
 
 
 }

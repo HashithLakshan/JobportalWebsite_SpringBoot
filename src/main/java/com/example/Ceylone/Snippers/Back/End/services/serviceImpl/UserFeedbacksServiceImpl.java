@@ -84,6 +84,7 @@ public class UserFeedbacksServiceImpl implements UserFeedbacksService {
             UserFeedbacks userFeedbacks = castUsersFeedbacksDTOIntoUsersFeedbacks(userFeedbacksDto);
             userFeedbacksRepository.save(userFeedbacks);
             commonResponse.setStatus(true);
+            commonResponse.setCommonMessage("Your Request Sent Successfully");
             commonResponse.setPayload(Collections.singletonList(userFeedbacks));
 
 
@@ -224,10 +225,13 @@ public class UserFeedbacksServiceImpl implements UserFeedbacksService {
     private List<String> UserFeedbacksValidation(UserFeedbacksDto userFeedbacksDto) {
 
         List<String> validationList = new ArrayList<>();
+        if(CommonValidation.stringNullValidation(userFeedbacksDto.getUserDto().getUserID()))
+            validationList.add("please Login Your Account");
+        if (CommonValidation.stringNullValidation(userFeedbacksDto.getUserSubject()))
+            validationList.add("Your subject Field are Empty ");
         if (CommonValidation.stringNullValidation(userFeedbacksDto.getUserDiscription()))
-            validationList.add(CommonMessage.SELECT_YOUR_SHOOT_TYPE);
-
-        return validationList;
+         validationList.add("Your Discription Field are Empty ");
+             return validationList;
     }
 
     private UserFeedbacks castUsersFeedbacksDTOIntoUsersFeedbacks(UserFeedbacksDto userFeedbacksDto) {

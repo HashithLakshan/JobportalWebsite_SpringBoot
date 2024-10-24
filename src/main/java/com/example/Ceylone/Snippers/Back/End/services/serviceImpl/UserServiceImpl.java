@@ -207,11 +207,11 @@ public  class UserServiceImpl implements UserService {
     CommonResponse commonResponse = new CommonResponse();
     User user;
     try {
-//        List<String> validationList = this.userValidation(userDto);
-//        if (!validationList.isEmpty()) {
-//            commonResponse.setErrorMessages(validationList);
-//            return commonResponse;
-//        }
+        List<String> validationList = this.userValidation(userDto);
+        if (!validationList.isEmpty()) {
+            commonResponse.setErrorMessages(validationList);
+            return commonResponse;
+        }
 
         user = castUserDTOIntoUser(userDto);
         user = userRepository.save(user);

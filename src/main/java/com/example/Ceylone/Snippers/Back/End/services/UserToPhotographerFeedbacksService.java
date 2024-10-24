@@ -22,4 +22,6 @@ public interface UserToPhotographerFeedbacksService  {
     CommonResponse getFeedabacksSearchName(String userName, String photographerID);
 
     CommonResponse getFeedabacksSearchID(String userID, String photographerID);
+
+    CommonResponse getFeedBackIDDetailss(String uToPFeedbackID);
 }
