@@ -36,6 +36,10 @@ private  final CatogoryService catogoryService;
        return catogoryService.updateCtogory(catogoryDto);
   }
 
+  @GetMapping("/getCatogoryAll")
+  public CommonResponse getCatogoryAll(){
+    return catogoryService.getAllCtogory();
+  }
     @GetMapping("/getCatagory/{id}")
     public CommonResponse getCatagoryByID(@PathVariable String id){
         return catogoryService.getCatagoryById(id);

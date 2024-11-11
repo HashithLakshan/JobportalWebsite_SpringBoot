@@ -122,15 +122,25 @@ public  class BookingServiceImpl implements BookingService {
         BookingsDto  bookingsDto =new BookingsDto();
 
         Predicate<Bookings> filterOnStatus = bookings1  -> bookings1.getCommonStatus() != CommonStatus.DELETE;
+try {
+    // Retrieve bookings for the photographer and filter them
+    List<Bookings> bookingsList = bookingRepository.findByUserUserIDAndPhotographer_PhotographerID((Long.valueOf(userID)), Long.valueOf(photographerID));
+    if (bookingsList == null || bookingsList.size () ==0) {
+        commonResponse.setStatus(false);
+        commonResponse.setCommonMessage("This user have not bookings");
+    } else {
 
-        // Retrieve bookings for the photographer and filter them
-        List<Bookings> bookingsList = bookingRepository.findByUserUserIDAndPhotographer_PhotographerID((Long.valueOf(userID)), Long.valueOf(photographerID));
         List<BookingsDto> bookingsDtos = bookingsList.stream().filter(filterOnStatus).map(this::castBookingIntoBookingDto).collect(Collectors.toList());
-
-
         commonResponse.setStatus(true);
         commonResponse.setPayload(Collections.singletonList(bookingsDtos));
-        System.out.println(bookingsDtos);
+    }
+} catch (Exception e) {
+    commonResponse.setStatus(false);
+    commonResponse.setCommonMessage("This user have not bookings");
+
+    LOGGER.error("/**************** Exception in BookingService -> getAll()"+e);
+
+}
         return commonResponse;
     }
 
@@ -165,6 +175,7 @@ public  class BookingServiceImpl implements BookingService {
                 bookings.setCommonStatus(CommonStatus.DELETE);
                 bookingRepository.save(bookings);
                 commonResponse.setStatus(true);
+                commonResponse.setCommonMessage("Successfully deleted");
                 commonResponse.setPayload(Collections.singletonList(bookings));
             } else {
                 commonResponse.setErrorMessages(Collections.singletonList("Booking not found"));
@@ -187,14 +198,23 @@ public  class BookingServiceImpl implements BookingService {
         BookingsDto  bookingsDto =new BookingsDto();
 
         Predicate<Bookings> filterOnStatus = bookings1  -> bookings1.getCommonStatus() != CommonStatus.DELETE;
+try {
+    // Retrieve bookings for the photographer and filter them
+    List<Bookings> bookingsList = bookingRepository.findByUserUserNameAndPhotographerPhotographerID(userName, Long.valueOf(photographerID));
+    if (bookingsList == null || bookingsList.size() == 0) {
+        commonResponse.setStatus(false);
+        commonResponse.setCommonMessage("This user have not bookings");
+    } else {
 
-        // Retrieve bookings for the photographer and filter them
-        List<Bookings> bookingsList = bookingRepository.findByUserUserNameAndPhotographerPhotographerID(userName, Long.valueOf(photographerID));
         List<BookingsDto> bookingsDtos = bookingsList.stream().filter(filterOnStatus).map(this::castBookingIntoBookingDto).collect(Collectors.toList());
 
 
         commonResponse.setStatus(true);
         commonResponse.setPayload(Collections.singletonList(bookingsDtos));
+    }
+} catch (Exception e) {
+    LOGGER.error("/**************** Exception in BookingService -> get userName()" + e);
+}
         return commonResponse;
 
 

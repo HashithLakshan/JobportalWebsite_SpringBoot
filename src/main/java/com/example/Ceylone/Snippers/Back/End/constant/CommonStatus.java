@@ -5,6 +5,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 public enum CommonStatus {
     ACTIVE,
     INACTIVE,
-
-    DELETE
+    DELETE,
+    SATISFIED,
+    NOT_SATISFIED,
 }

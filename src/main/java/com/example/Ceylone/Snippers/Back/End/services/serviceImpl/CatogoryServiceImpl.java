@@ -82,7 +82,7 @@ Catogory catogory = new Catogory();
         CommonResponse commonResponse=new CommonResponse();
         List<CatogoryDto> catagoryDtoList = new ArrayList<>();
         try {
-            Predicate<Catogory> filterOnStatus= catogory ->  catogory.getCommonStatus()!= CommonStatus.DELETE;
+            Predicate<Catogory> filterOnStatus= catogory ->  catogory.getCommonStatus()== CommonStatus.ACTIVE;
             catagoryDtoList= catogoryRepository.findAll().stream().filter(filterOnStatus).map(this::castCatogoryIntoCtogoryDto).collect(Collectors.toList());
             commonResponse.setStatus(true);
             commonResponse.setPayload(Collections.singletonList(catagoryDtoList));

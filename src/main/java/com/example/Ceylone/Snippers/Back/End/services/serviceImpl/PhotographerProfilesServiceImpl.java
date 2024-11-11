@@ -90,6 +90,7 @@ public class PhotographerProfilesServiceImpl implements PhotographerProfilesServ
             photographersProfiles = castProfilesDTOIntoProfiles(photographersProfilesDto);
             photographersProfiles = photographerProfilesRepository.save(photographersProfiles);
             commonResponse.setStatus(true);
+            commonResponse.setCommonMessage("Profile create successfully");
             commonResponse.setPayload(Collections.singletonList(photographersProfiles));
         } catch (Exception e) {
             LOGGER.error("/**************** Exception in ProfileService -> save()" + e);

@@ -23,6 +23,11 @@ public class UserToPhotographerFeedbacksController {
     private CommonResponse getAllPhotographerFeedbacksActive(@PathVariable String PhotographerID){
         return userToPhotographerFeedbacksService.getAllPhotographerFeedbacksActive(PhotographerID);
     }
+
+    @GetMapping("/getFeedbacksAllSatisfied/{PhotographerID}")
+    private CommonResponse getFeedbacksAllSatisfied(@PathVariable String PhotographerID){
+    return userToPhotographerFeedbacksService.getallStaisfied(PhotographerID);
+    }
     @PostMapping("/saveUserToPhotographerFeedbacks")
     public CommonResponse saveFeedback(@RequestBody UserToPhotographerFeedbacksDto userToPhotographerFeedbacksDto){
         return userToPhotographerFeedbacksService.saveFeedback(userToPhotographerFeedbacksDto);
@@ -57,6 +62,15 @@ public class UserToPhotographerFeedbacksController {
     @GetMapping("/getFeedbacksByUserID/{userID}/{photographerID}")
     public  CommonResponse getFeedabacksSearchID(@PathVariable String userID,@PathVariable String photographerID){
         return userToPhotographerFeedbacksService.getFeedabacksSearchID( userID,photographerID);
+    }
+    @GetMapping("/getFeedbackByUserNameSatisfied/{userName}/{photographerID}")
+    public CommonResponse getFeedbackByUserNameSatisfied(@PathVariable String userName,@PathVariable String photographerID){
+    return userToPhotographerFeedbacksService.satisfiedByUserName(userName,photographerID);
+    }
+
+    @GetMapping("/getFeedbackByUserIDSatisfied/{userID}/{photographerID}")
+    public  CommonResponse getFeedbackByUserIDSatisfied(@PathVariable String userID,@PathVariable String photographerID){
+    return  userToPhotographerFeedbacksService.getFeedbacksSatisfiedUserID(userID,photographerID);
     }
     @GetMapping("/getFeedBackIDDetails/{uToPFeedbackID}")
     public  CommonResponse getFeedBackIDDetails(@PathVariable String uToPFeedbackID ){

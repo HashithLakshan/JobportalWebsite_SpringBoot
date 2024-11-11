@@ -48,18 +48,20 @@ public class UserToPhotographerFeedbacksServiceImpl implements UserToPhotographe
         CommonResponse commonResponse = new CommonResponse();
 
 
-        PhotographerDto photographerDto = new PhotographerDto();
         UserToPhotographerFeedbacksDto userToPhotographerFeedbacksDto = new UserToPhotographerFeedbacksDto();
 
-        Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks -> userToPhotographerFeedbacks.getCommonStatus() == CommonStatus.ACTIVE;
+        Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks -> userToPhotographerFeedbacks.getCommonStatus() ==( CommonStatus.NOT_SATISFIED);
+try {
+    // Retrieve bookings for the photographer and filter them
+    List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByPhotographer_PhotographerID(Long.valueOf(photographerID));
+    List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
 
-        // Retrieve bookings for the photographer and filter them
-        List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByPhotographer_PhotographerID(Long.valueOf(photographerID));
-        List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
 
-
-        commonResponse.setStatus(true);
-        commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+    commonResponse.setStatus(true);
+    commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+} catch (Exception e) {
+    LOGGER.error("***********************getAllDetails Photographertouser feedbacks*****************************"+e);
+}
         return commonResponse;
     }
 
@@ -154,12 +156,16 @@ CommonResponse commonResponse =new CommonResponse();
     public CommonResponse updateDelete(String uToPFeedbackID) {
         CommonResponse commonResponse = new CommonResponse();
         UserToPhotographerFeedbacks userToPhotographerFeedbacks;
+        UserToPhotographerFeedbacksDto userToPhotographerFeedbacksDto = new UserToPhotographerFeedbacksDto();
+
+
         try {
             userToPhotographerFeedbacks= userToPhotographerFeedbacksRepository.findById(Long.valueOf(uToPFeedbackID)).get();
             if (userToPhotographerFeedbacks != null) {
                 userToPhotographerFeedbacks.setCommonStatus(CommonStatus.DELETE);
                 userToPhotographerFeedbacksRepository.save(userToPhotographerFeedbacks);
                 commonResponse.setStatus(true);
+                commonResponse.setCommonMessage("User Deleted Successfully");
                 commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacks));
             } else {
                 commonResponse.setErrorMessages(Collections.singletonList("Feedback not found"));
@@ -205,7 +211,7 @@ CommonResponse commonResponse =new CommonResponse();
 
 
 
-        Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks   -> userToPhotographerFeedbacks.getCommonStatus() != CommonStatus.DELETE;
+        Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks   -> userToPhotographerFeedbacks.getCommonStatus() == CommonStatus.NOT_SATISFIED;
 
         // Retrieve bookings for the photographer and filter them
         List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByUserUserNameAndPhotographerPhotographerID(userName, Long.valueOf(photographerID));
@@ -231,16 +237,25 @@ CommonResponse commonResponse =new CommonResponse();
 
 
         UserToPhotographerFeedbacksDto  userToPhotographerFeedbacksDto =new UserToPhotographerFeedbacksDto();
+
+
+            Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks -> userToPhotographerFeedbacks.getCommonStatus() == CommonStatus.NOT_SATISFIED;
         try {
-
-            Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks -> userToPhotographerFeedbacks.getCommonStatus() != CommonStatus.DELETE;
-
             // Retrieve bookings for the photographer and filter them
             List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByUserUserIDAndPhotographerPhotographerID(Long.valueOf(userID), Long.valueOf(photographerID));
-            List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
-            commonResponse.setStatus(true);
-            commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+
+            if (userToPhotographerFeedbacksList == null || userToPhotographerFeedbacksList.size() == 0) {
+                commonResponse.setStatus(false);
+                commonResponse.setCommonMessage("User Not Found");
+            }else {
+                List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
+                commonResponse.setStatus(true);
+                commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+
+            }
         } catch (Exception e) {
+            commonResponse.setStatus(false);
+            commonResponse.setCommonMessage("User Not Found");
             LOGGER.error("***************** Search Id User to Photographer****************"+e);
 
         }
@@ -270,6 +285,93 @@ CommonResponse commonResponse =new CommonResponse();
 
 
     }
+
+    @Override
+    public CommonResponse getallStaisfied(String photographerID) {
+        CommonResponse commonResponse = new CommonResponse();
+        Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks -> userToPhotographerFeedbacks.getCommonStatus() ==( CommonStatus.SATISFIED);
+        try {
+            // Retrieve bookings for the photographer and filter them
+            List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByPhotographer_PhotographerID(Long.valueOf(photographerID));
+            List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
+
+
+            commonResponse.setStatus(true);
+            commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+        } catch (Exception e) {
+            LOGGER.error("***********************getAllDetailsPhotographerToUserFeedbacks***Satisfied**************************"+e);
+        }
+        return commonResponse;
+
+    }
+
+    @Override
+    public CommonResponse satisfiedByUserName(String userName, String photographerID) {
+        CommonResponse commonResponse = new CommonResponse();
+
+
+        UserToPhotographerFeedbacksDto  userToPhotographerFeedbacksDto =new UserToPhotographerFeedbacksDto();
+
+
+
+
+
+        Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks   -> userToPhotographerFeedbacks.getCommonStatus() == CommonStatus.SATISFIED;
+try {
+    // Retrieve bookings for the photographer and filter them
+    List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByUserUserNameAndPhotographerPhotographerID(userName, Long.valueOf(photographerID));
+
+    List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
+    if (userToPhotographerFeedbacksDtos.isEmpty()) {
+        commonResponse.setStatus(false);
+        commonResponse.setCommonMessage("User Not Found");
+
+    } else {
+        commonResponse.setStatus(true);
+        commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+    }
+} catch (Exception e) {
+    LOGGER.error("*******************SearchingByUserName*****Satisfied********************");
+}
+
+        return commonResponse;
+    }
+
+    @Override
+    public CommonResponse getFeedbacksSatisfiedUserID(String userID, String photographerID) {
+        CommonResponse commonResponse = new CommonResponse();
+
+
+        UserToPhotographerFeedbacksDto  userToPhotographerFeedbacksDto =new UserToPhotographerFeedbacksDto();
+
+
+
+
+        Predicate<UserToPhotographerFeedbacks> filterOnStatus = userToPhotographerFeedbacks -> userToPhotographerFeedbacks.getCommonStatus() == CommonStatus.SATISFIED;
+        try {
+            // Retrieve bookings for the photographer and filter them
+            List<UserToPhotographerFeedbacks> userToPhotographerFeedbacksList = userToPhotographerFeedbacksRepository.findByUserUserIDAndPhotographerPhotographerID(Long.valueOf(userID), Long.valueOf(photographerID));
+
+            if (userToPhotographerFeedbacksList == null || userToPhotographerFeedbacksList.size() == 0) {
+                commonResponse.setStatus(false);
+                commonResponse.setCommonMessage("User Not Found");
+            }else {
+                List<UserToPhotographerFeedbacksDto> userToPhotographerFeedbacksDtos = userToPhotographerFeedbacksList.stream().filter(filterOnStatus).map(this::castUserToPhotographerFeedbacksIntoUserToPhotographerFeedbacksDto).collect(Collectors.toList());
+                commonResponse.setStatus(true);
+                commonResponse.setPayload(Collections.singletonList(userToPhotographerFeedbacksDtos));
+
+            }
+        } catch (Exception e) {
+            commonResponse.setStatus(false);
+            commonResponse.setCommonMessage("User Not Found");
+            LOGGER.error("***************** Search Id User to Photographer****************"+e);
+
+        }
+
+        return commonResponse;
+    }
+
+
 
     private List<String> FeedbacksValidation(UserToPhotographerFeedbacksDto userToPhotographerFeedbacksDto) {
 
